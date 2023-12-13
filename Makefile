@@ -3,6 +3,7 @@ INCDIR=include
 SRCDIR=src
 MAINDIR=main
 OBJDIR=obj
+BINDIR=bin
 OBJECTS=$(OBJDIR)/noise-field.o $(OBJDIR)/OpenSimplexNoise.o $(OBJDIR)/bit-field.o $(OBJDIR)/static-field.o $(OBJDIR)/RandomFunctions.o $(OBJDIR)/ArtFunctions.o $(OBJDIR)/print10.o
 BINARIES=noise-field bit-field static-field print10
 
@@ -12,21 +13,24 @@ RGB_LIBRARY_NAME=rgbmatrix
 RGB_LIBRARY=$(RGB_LIBDIR)/lib$(RGB_LIBRARY_NAME).a
 LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread
 
-all : $(OBJDIR) noise-field bit-field static-field print10
+all : $(OBJDIR) $(BINDIR) $(addprefix $(BINDIR)/,$(BINARIES))
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-noise-field : $(OBJDIR)/noise-field.o $(OBJDIR)/OpenSimplexNoise.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
+$(BINDIR):
+	mkdir -p $(BINDIR)
+
+$(BINDIR)/noise-field : $(OBJDIR)/noise-field.o $(OBJDIR)/OpenSimplexNoise.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
-bit-field : $(OBJDIR)/bit-field.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
+$(BINDIR)/bit-field : $(OBJDIR)/bit-field.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
-static-field : $(OBJDIR)/static-field.o $(OBJDIR)/RandomFunctions.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
+$(BINDIR)/static-field : $(OBJDIR)/static-field.o $(OBJDIR)/RandomFunctions.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
-print10 : $(OBJDIR)/print10.o $(OBJDIR)/RandomFunctions.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
+$(BINDIR)/print10 : $(OBJDIR)/print10.o $(OBJDIR)/RandomFunctions.o $(OBJDIR)/ArtFunctions.o $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(RGB_LIBRARY): FORCE
@@ -39,7 +43,7 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) -I$(INCDIR) -I$(RGB_INCDIR) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf $(OBJDIR) $(BINARIES)
+	rm -rf $(OBJDIR) $(BINDIR)
 	$(MAKE) -C $(RGB_LIBDIR) clean
 
 FORCE:
